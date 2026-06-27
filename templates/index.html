@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes Center</title>
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="A modern dashboard to explore, search, filter, and share Google Cloud BigQuery release notes.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Navigation Panel -->
+        <aside class="app-sidebar">
+            <div class="sidebar-header">
+                <div class="logo-wrapper">
+                    <!-- Custom SVG representing BigQuery/Cloud DB -->
+                    <svg class="bq-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#grad1)" />
+                        <path d="M2 17L12 22L22 17M2 12L12 17L22 12" stroke="url(#grad2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <defs>
+                            <linearGradient id="grad1" x1="2" y1="2" x2="22" y2="12" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#4285F4" />
+                                <stop offset="1" stop-color="#34A853" />
+                            </linearGradient>
+                            <linearGradient id="grad2" x1="2" y1="12" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#EA4335" />
+                                <stop offset="1" stop-color="#FBBC05" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>BigQuery</h1>
+                    <span class="sub-brand">Release Center</span>
+                </div>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="sidebar-content">
+                <div class="search-section">
+                    <label for="search-input" class="section-label">Search Updates</label>
+                    <div class="search-box">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" id="search-input" placeholder="Filter by keyword..." aria-label="Search release notes">
+                        <button id="clear-search" class="clear-btn" aria-label="Clear search" title="Clear search">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <span class="section-label">Filter by Type</span>
+                    <div class="filter-pills" role="group" aria-label="Filter updates by type">
+                        <button class="filter-pill active" data-type="all">All Updates</button>
+                        <button class="filter-pill" data-type="feature">
+                            <span class="indicator feature"></span>Features
+                        </button>
+                        <button class="filter-pill" data-type="change">
+                            <span class="indicator change"></span>Changes
+                        </button>
+                        <button class="filter-pill" data-type="announcement">
+                            <span class="indicator announcement"></span>Announcements
+                        </button>
+                        <button class="filter-pill" data-type="deprecation">
+                            <span class="indicator deprecation"></span>Deprecations
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stats-section">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-updates-count">-</div>
+                        <div class="stat-label">Total Updates Shown</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="meta-info">
+                    <span class="feed-status" id="feed-status">
+                        <span class="status-dot green"></span> Live Feed
+                    </span>
+                    <span class="last-fetch" id="last-fetch-time">Never</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            <!-- Mobile Header -->
+            <header class="mobile-header">
+                <div class="brand-text">
+                    <h1>BigQuery Release Center</h1>
+                </div>
+                <button id="mobile-menu-toggle" class="btn-icon" aria-label="Toggle filters">
+                    <i data-lucide="sliders-horizontal"></i>
+                </button>
+            </header>
+
+            <!-- Top Action Bar -->
+            <section class="action-bar">
+                <div class="action-left">
+                    <h2 class="view-title">Latest Releases</h2>
+                    <p class="view-subtitle" id="feed-subtitle">Fetching BigQuery release history...</p>
+                </div>
+                <div class="action-right">
+                    <button id="refresh-btn" class="btn btn-primary" title="Force refresh feed">
+                        <i data-lucide="refresh-cw" class="icon-refresh"></i>
+                        <span>Refresh Notes</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Release Notes List Container -->
+            <section class="timeline-container" id="timeline-container">
+                <!-- Skeleton loader shown on initial load -->
+                <div class="skeleton-wrapper" id="skeleton-loader">
+                    <div class="skeleton-card">
+                        <div class="skeleton-header"></div>
+                        <div class="skeleton-body">
+                            <div class="skeleton-line short"></div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton-header"></div>
+                        <div class="skeleton-body">
+                            <div class="skeleton-line short"></div>
+                            <div class="skeleton-line"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Dynmically loaded content will render here -->
+                <div id="notes-content" class="notes-content hidden"></div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="empty-state hidden">
+                    <div class="empty-icon-wrapper">
+                        <i data-lucide="search-code" class="empty-icon"></i>
+                    </div>
+                    <h3>No updates found</h3>
+                    <p>Try adjusting your search filters or check your connection.</p>
+                    <button id="reset-filters-btn" class="btn btn-secondary">Clear Filters</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Twitter Composer Dialog (Modern <dialog> element) -->
+    <dialog id="tweet-dialog" class="glass-dialog">
+        <div class="dialog-header">
+            <div class="dialog-title-wrapper">
+                <i data-lucide="twitter" class="tweet-logo-icon"></i>
+                <h3>Compose Tweet</h3>
+            </div>
+            <button class="dialog-close-btn" id="close-dialog-btn" aria-label="Close dialog">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        
+        <div class="dialog-body">
+            <p class="dialog-instructions">Draft your tweet below. We have automatically structured a tweet with the update summary, link, and relevant tags.</p>
+            
+            <!-- Real-time Mock X/Twitter Post Card -->
+            <div class="mock-tweet-card">
+                <div class="mock-tweet-avatar">
+                    <svg class="bq-logo-small" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#4285F4" />
+                        <path d="M2 17L12 22L22 17M2 12L12 17L22 12" stroke="#FBBC05" stroke-width="2" />
+                    </svg>
+                </div>
+                <div class="mock-tweet-content">
+                    <div class="mock-tweet-author">
+                        <span class="author-name">BigQuery Releases</span>
+                        <span class="author-handle">@BQReleases • Just now</span>
+                    </div>
+                    <div class="mock-tweet-text-preview" id="tweet-preview-text">
+                        <!-- Simulated preview -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editor -->
+            <div class="composer-wrapper">
+                <textarea id="tweet-textarea" rows="6" maxlength="500" placeholder="What is happening?"></textarea>
+                <div class="composer-footer">
+                    <button id="smart-shorten-btn" class="btn btn-secondary btn-sm" title="Truncate details to fit character limit">
+                        <i data-lucide="sparkles"></i> Auto-Shorten
+                    </button>
+                    <div class="char-count-container">
+                        <span id="char-count">0</span>/280
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warning if over limit -->
+            <div id="char-limit-warning" class="warning-banner hidden">
+                <i data-lucide="alert-triangle"></i>
+                <span>Tweet exceeds 280 characters. Standard tweets will be truncated on Twitter.</span>
+            </div>
+        </div>
+
+        <div class="dialog-footer">
+            <button id="cancel-tweet-btn" class="btn btn-secondary">Cancel</button>
+            <button id="submit-tweet-btn" class="btn btn-primary btn-tweet">
+                <i data-lucide="send"></i> Open Twitter
+            </button>
+        </div>
+    </dialog>
+
+    <!-- Script -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
