@@ -1322,3 +1322,12 @@ body {
     background-color: rgba(0, 0, 0, 0.02);
 }
 
+/* Search Highlight */
+mark.search-highlight {
+    background-color: rgba(251, 188, 5, 0.25);
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--color-bq-yellow);
+    border-radius: 2px;
+    padding: 0 1px;
+}
+

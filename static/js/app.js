@@ -392,7 +392,7 @@ function renderUpdates(filteredUpdates) {
                     </a>
                 </header>
                 <div class="release-group-body">
-                    ${group.updates.map(update => renderUpdateItem(update)).join('')}
+                    ${group.updates.map(update => renderUpdateItem(update, state.filters.search)).join('')}
                 </div>
             </article>
         `;
@@ -409,11 +409,20 @@ function renderUpdates(filteredUpdates) {
 }
 
 // Render HTML for a single update item
-function renderUpdateItem(update) {
+function renderUpdateItem(update, searchVal) {
+    let highlightedCategory = update.category;
+    if (searchVal) {
+        const escapedSearch = searchVal.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const regex = new RegExp(`(${escapedSearch})`, 'gi');
+        highlightedCategory = update.category.replace(regex, '<mark class="search-highlight">$1</mark>');
+    }
+    
+    const highlightedHtmlContent = getHighlightedHtml(update.htmlContent, searchVal);
+    
     return `
         <section class="release-update-item ${update.type}-item" id="update-item-${update.uniqueId}">
             <div class="update-meta-row">
-                <span class="update-badge ${update.type}">${update.category}</span>
+                <span class="update-badge ${update.type}">${highlightedCategory}</span>
                 <div class="update-actions">
                     <button class="btn-copy-action" data-id="${update.uniqueId}" title="Copy raw update text to clipboard">
                         <i data-lucide="copy"></i>
@@ -426,7 +435,7 @@ function renderUpdateItem(update) {
                 </div>
             </div>
             <div class="update-text">
-                ${update.htmlContent}
+                ${highlightedHtmlContent}
             </div>
         </section>
     `;
@@ -686,4 +695,55 @@ function updateThemeToggleIcons(theme) {
         sunIcons.forEach(i => i.classList.remove('hidden'));
         moonIcons.forEach(i => i.classList.add('hidden'));
     }
+}
+
+// Safely highlight search terms inside HTML text nodes recursively
+function highlightNode(node, searchRegex) {
+    if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent;
+        if (searchRegex.test(text)) {
+            const fragment = document.createDocumentFragment();
+            let lastIndex = 0;
+            
+            text.replace(searchRegex, (match, index) => {
+                if (index > lastIndex) {
+                    fragment.appendChild(document.createTextNode(text.substring(lastIndex, index)));
+                }
+                const mark = document.createElement('mark');
+                mark.className = 'search-highlight';
+                mark.textContent = match;
+                fragment.appendChild(mark);
+                lastIndex = index + match.length;
+            });
+            
+            if (lastIndex < text.length) {
+                fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+            }
+            
+            node.parentNode.replaceChild(fragment, node);
+        }
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+        if (node.tagName !== 'SCRIPT' && node.tagName !== 'STYLE') {
+            const children = Array.from(node.childNodes);
+            children.forEach(child => highlightNode(child, searchRegex));
+        }
+    }
+}
+
+// Wrap matching text in release HTML content with <mark> tags
+function getHighlightedHtml(htmlContent, searchTerm) {
+    if (!searchTerm) return htmlContent;
+    
+    const parser = new DOMParser();
+    // Parse into a temporary block element wrapper
+    const doc = parser.parseFromString(`<div>${htmlContent}</div>`, 'text/html');
+    const wrapper = doc.body.firstChild;
+    
+    // Escape regex symbols to prevent search string injection crashes
+    const escapedSearch = searchTerm.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const regex = new RegExp(escapedSearch, 'gi');
+    
+    highlightNode(wrapper, regex);
+    
+    return wrapper.innerHTML;
 }
