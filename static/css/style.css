@@ -586,6 +586,47 @@ body {
     color: var(--color-default);
 }
 
+/* Update Actions Area */
+.update-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Copy Button on card */
+.btn-copy-action {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition-fast);
+}
+
+.btn-copy-action:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: var(--border-color-hover);
+    color: var(--text-primary);
+}
+
+.btn-copy-action.copied {
+    background-color: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: var(--color-feature);
+}
+
+.btn-copy-action i {
+    width: 14px;
+    height: 14px;
+}
+
 /* Tweet Button on card */
 .btn-tweet-action {
     background-color: transparent;

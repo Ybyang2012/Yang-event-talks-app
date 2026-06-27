@@ -3,6 +3,7 @@ let state = {
     feedTitle: 'BigQuery Release Notes',
     entries: [],          // Raw feed entries
     parsedUpdates: [],    // Structured individual updates
+    filteredUpdates: [],  // Stored filtered list for export
     filters: {
         search: '',
         type: 'all'       // all, feature, change, announcement, deprecation, other
@@ -137,6 +138,14 @@ function bindEvents() {
             const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
             window.open(twitterUrl, '_blank', 'noopener,noreferrer');
             tweetDialog.close();
+        });
+    }
+
+    // Export CSV Button
+    const exportCsvBtn = document.getElementById('export-csv-btn');
+    if (exportCsvBtn) {
+        exportCsvBtn.addEventListener('click', () => {
+            exportToCsv();
         });
     }
 }
@@ -310,6 +319,9 @@ function applyFilters() {
         return true;
     });
     
+    // Save filtered list to state for CSV export
+    state.filteredUpdates = filteredUpdates;
+
     // Update count display
     document.getElementById('total-updates-count').textContent = filteredUpdates.length;
     
@@ -379,8 +391,9 @@ function renderUpdates(filteredUpdates) {
     // Re-initialize icons inside rendered HTML
     initLucide();
     
-    // Bind Tweet button actions
+    // Bind button actions
     bindTweetButtons(filteredUpdates);
+    bindCopyButtons(filteredUpdates);
 }
 
 // Render HTML for a single update item
@@ -389,10 +402,16 @@ function renderUpdateItem(update) {
         <section class="release-update-item ${update.type}-item" id="update-item-${update.uniqueId}">
             <div class="update-meta-row">
                 <span class="update-badge ${update.type}">${update.category}</span>
-                <button class="btn-tweet-action" data-id="${update.uniqueId}" title="Share this update on X/Twitter">
-                    <i data-lucide="twitter"></i>
-                    <span>Tweet update</span>
-                </button>
+                <div class="update-actions">
+                    <button class="btn-copy-action" data-id="${update.uniqueId}" title="Copy raw update text to clipboard">
+                        <i data-lucide="copy"></i>
+                        <span>Copy</span>
+                    </button>
+                    <button class="btn-tweet-action" data-id="${update.uniqueId}" title="Share this update on X/Twitter">
+                        <i data-lucide="twitter"></i>
+                        <span>Tweet update</span>
+                    </button>
+                </div>
             </div>
             <div class="update-text">
                 ${update.htmlContent}
@@ -528,4 +547,88 @@ function escapeHTML(str) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+}
+
+// Bind event listeners for copy buttons
+function bindCopyButtons(filteredUpdates) {
+    const buttons = document.querySelectorAll('.btn-copy-action');
+    buttons.forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const button = e.currentTarget;
+            const updateId = button.getAttribute('data-id');
+            const targetUpdate = filteredUpdates.find(u => u.uniqueId === updateId);
+            
+            if (targetUpdate) {
+                try {
+                    // Extract text content and copy to clipboard
+                    await navigator.clipboard.writeText(targetUpdate.textContent);
+                    
+                    // Show success feedback
+                    button.classList.add('copied');
+                    button.innerHTML = '<i data-lucide="check"></i><span>Copied!</span>';
+                    initLucide();
+                    
+                    // Reset after 1.5s
+                    setTimeout(() => {
+                        button.classList.remove('copied');
+                        button.innerHTML = '<i data-lucide="copy"></i><span>Copy</span>';
+                        initLucide();
+                    }, 1500);
+                } catch (err) {
+                    console.error('Clipboard copy failed:', err);
+                }
+            }
+        });
+    });
+}
+
+// Export filtered updates to CSV file
+function exportToCsv() {
+    const updates = state.filteredUpdates || [];
+    if (updates.length === 0) {
+        alert("No updates matching the current filters to export.");
+        return;
+    }
+    
+    // Helper to sanitize text for CSV format
+    const escapeCsv = (text) => {
+        if (text === null || text === undefined) return '';
+        let stringValue = text.toString();
+        // Replace quotes with double quotes
+        stringValue = stringValue.replace(/"/g, '""');
+        // Wrap in quotes if it contains commas, newlines, or quotes
+        if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"')) {
+            return `"${stringValue}"`;
+        }
+        return stringValue;
+    };
+    
+    const headers = ['Date', 'Category', 'Normalized Type', 'Content Text', 'Release Link'];
+    const rows = updates.map(u => [
+        u.date,
+        u.category,
+        u.type,
+        u.textContent,
+        u.link
+    ]);
+    
+    const csvContent = [
+        headers.map(escapeCsv).join(','),
+        ...rows.map(row => row.map(escapeCsv).join(','))
+    ].join('\n');
+    
+    // Trigger browser file download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `bigquery_release_notes_${dateStr}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
