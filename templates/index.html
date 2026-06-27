@@ -41,6 +41,10 @@
                     <h1>BigQuery</h1>
                     <span class="sub-brand">Release Center</span>
                 </div>
+                <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Light/Dark Mode" aria-label="Toggle theme">
+                    <i data-lucide="sun" class="icon-sun"></i>
+                    <i data-lucide="moon" class="icon-moon hidden"></i>
+                </button>
             </div>
 
             <!-- Filter Controls -->
@@ -100,9 +104,15 @@
                 <div class="brand-text">
                     <h1>BigQuery Release Center</h1>
                 </div>
-                <button id="mobile-menu-toggle" class="btn-icon" aria-label="Toggle filters">
-                    <i data-lucide="sliders-horizontal"></i>
-                </button>
+                <div class="mobile-header-actions">
+                    <button id="mobile-theme-toggle" class="btn-icon" aria-label="Toggle theme" title="Toggle theme">
+                        <i data-lucide="sun" class="icon-sun"></i>
+                        <i data-lucide="moon" class="icon-moon hidden"></i>
+                    </button>
+                    <button id="mobile-menu-toggle" class="btn-icon" aria-label="Toggle filters">
+                        <i data-lucide="sliders-horizontal"></i>
+                    </button>
+                </div>
             </header>
 
             <!-- Top Action Bar -->

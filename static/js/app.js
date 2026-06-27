@@ -19,6 +19,7 @@ let state = {
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     initLucide();
     bindEvents();
     fetchReleaseNotes();
@@ -147,6 +148,17 @@ function bindEvents() {
         exportCsvBtn.addEventListener('click', () => {
             exportToCsv();
         });
+    }
+
+    // Theme Toggle Listeners
+    const themeToggle = document.getElementById('theme-toggle');
+    const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
+    
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => toggleTheme());
+    }
+    if (mobileThemeToggle) {
+        mobileThemeToggle.addEventListener('click', () => toggleTheme());
     }
 }
 
@@ -631,4 +643,47 @@ function exportToCsv() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+// Initialize the theme on startup
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeToggleIcons(savedTheme);
+}
+
+// Toggle between light and dark themes
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    // Smooth view transition support for theme toggling
+    if (document.startViewTransition) {
+        document.startViewTransition(() => {
+            applyTheme(newTheme);
+        });
+    } else {
+        applyTheme(newTheme);
+    }
+}
+
+// Apply theme attributes and store preference
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    updateThemeToggleIcons(theme);
+}
+
+// Show/Hide Lucide icons based on theme state
+function updateThemeToggleIcons(theme) {
+    const sunIcons = document.querySelectorAll('.icon-sun');
+    const moonIcons = document.querySelectorAll('.icon-moon');
+    
+    if (theme === 'light') {
+        sunIcons.forEach(i => i.classList.add('hidden'));
+        moonIcons.forEach(i => i.classList.remove('hidden'));
+    } else {
+        sunIcons.forEach(i => i.classList.remove('hidden'));
+        moonIcons.forEach(i => i.classList.add('hidden'));
+    }
 }

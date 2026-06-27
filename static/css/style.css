@@ -1148,3 +1148,177 @@ body {
         cursor: pointer;
     }
 }
+
+/* Theme Toggle Button (Desktop Sidebar) */
+.theme-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+}
+
+.theme-toggle-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.theme-toggle-btn i {
+    width: 18px;
+    height: 18px;
+}
+
+/* Mobile Header actions container */
+.mobile-header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Light Theme Variables Override */
+[data-theme="light"] {
+    --bg-primary: #f9fafb;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f3f4f6;
+    --bg-glass: rgba(255, 255, 255, 0.7);
+    --border-color: rgba(0, 0, 0, 0.08);
+    --border-color-hover: rgba(0, 0, 0, 0.15);
+    
+    /* Text Colors */
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #9ca3af;
+    
+    /* Hover/Focus Adjustments */
+    --bg-tertiary-hover: #e5e7eb;
+    
+    /* Category Transparencies (more legible on light backgrounds) */
+    --color-feature-bg: rgba(16, 185, 129, 0.15);
+    --color-change-bg: rgba(59, 130, 246, 0.15);
+    --color-announcement-bg: rgba(139, 92, 246, 0.15);
+    --color-deprecation-bg: rgba(239, 68, 68, 0.15);
+    --color-default-bg: rgba(107, 114, 128, 0.15);
+}
+
+/* Light Theme specific overrides */
+[data-theme="light"] .theme-toggle-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .btn-secondary {
+    background-color: #ffffff;
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+[data-theme="light"] .btn-secondary:hover {
+    background-color: #f9fafb;
+    border-color: #9ca3af;
+}
+
+[data-theme="light"] .search-box input {
+    background-color: #ffffff;
+    border-color: #d1d5db;
+    color: #111827;
+}
+
+[data-theme="light"] .search-box input::placeholder {
+    color: #9ca3af;
+}
+
+[data-theme="light"] .stat-card {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.01) 0%, rgba(0, 0, 0, 0.03) 100%);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .sidebar-footer {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .btn-copy-action:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .update-text code {
+    color: #6d28d9;
+    background-color: rgba(109, 40, 217, 0.06);
+}
+
+[data-theme="light"] .update-text a {
+    color: #1a73e8;
+}
+
+[data-theme="light"] .update-text a:hover {
+    border-bottom-color: #1a73e8;
+}
+
+/* Modal and Tweet Composer Light Mode Overrides */
+[data-theme="light"] .glass-dialog {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #0f1419;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .dialog-header {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+    background-color: rgba(0, 0, 0, 0.01);
+}
+
+[data-theme="light"] .dialog-close-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #0f1419;
+}
+
+[data-theme="light"] .dialog-instructions {
+    color: #536471;
+}
+
+[data-theme="light"] .mock-tweet-card {
+    background-color: #ffffff;
+    border-color: #e1e8ed;
+}
+
+[data-theme="light"] .author-name {
+    color: #0f1419;
+}
+
+[data-theme="light"] .author-handle {
+    color: #536471;
+}
+
+[data-theme="light"] .mock-tweet-text-preview {
+    color: #0f1419;
+}
+
+[data-theme="light"] .composer-wrapper {
+    border-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .composer-wrapper textarea {
+    color: #0f1419;
+}
+
+[data-theme="light"] .composer-footer {
+    border-top-color: rgba(0, 0, 0, 0.08);
+    background-color: rgba(0, 0, 0, 0.01);
+}
+
+[data-theme="light"] .warning-banner {
+    background-color: rgba(239, 68, 68, 0.06);
+    border-color: rgba(239, 68, 68, 0.15);
+    color: #b91c1c;
+}
+
+[data-theme="light"] .dialog-footer {
+    border-top-color: rgba(0, 0, 0, 0.08);
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
